@@ -1,0 +1,12 @@
+{
+  "name": "nomnom",
+  "version": "1.0.0",
+  "description": "Pacman clone made using HTML5 Canvas and JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
