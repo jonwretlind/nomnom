@@ -25,6 +25,7 @@ let player;
 let cursors;
 let enemies;
 let walls; // Maze walls
+let energyDots;
 const enemySpeed = 100;
 const brickSize = 25; // Assume the brick image is 25x25 pixels
 let gameOver = false;
@@ -100,8 +101,10 @@ function create() {
     // ----------------------------
     // PLAYFIELD
     // ----------------------------    
-    // Create maze walls using static physics group
+    // Create maze walls and dots using static physics group
     walls = this.physics.add.staticGroup();
+    energyDots = this.physics.add.staticGroup();
+
     // Example maze layout (you can customize this)
     // Each 'wall' is represented as [x, y, width, height]
     let mazeLayout;
@@ -112,29 +115,10 @@ function create() {
         mazeLayout.forEach(([x, y, width, height]) => {
             createTiledWall(this, walls, x, y, width, height);
         });
+        // Once the walls are added, add energy dots
+        addEnergyDots(this, walls);
     });
-
-    // ----------------------------
-    // ENERGYDOTS
-    // ----------------------------    
-    // Create energy dots group
-    const energyDots = this.physics.add.staticGroup();
-
-    // Define the size of the grid and spacing between dots
-    const dotSpacing = 50;  // Distance between each dot
-    const dotSize = 15;     // Size of each dot (adjust if necessary)
-
-    // Create a grid of energy dots
-    for (let x = 100; x < config.width - 100; x += dotSpacing) {
-        for (let y = 100; y < config.height - 100; y += dotSpacing) {
-            // Place the energy dot if it's not overlapping with walls
-            const dot = energyDots.create(x, y, 'energyDot');
-            dot.setDisplaySize(dotSize, dotSize);  // Adjust size if needed
-            dot.refreshBody();
-        }
-    }
-
-
+    
 
     function createTiledWall(scene, wallGroup, startX, startY, width, height) {
         const bricksHorizontal = Math.ceil(width / brickSize);  // Number of bricks horizontally
@@ -152,6 +136,51 @@ function create() {
             }
         }
     }
+
+
+    // ----------------------------
+    // ENERGYDOTS
+    // ----------------------------    
+    // Function to add energy dots after walls are created
+    function addEnergyDots(scene, walls) {
+        // Create energy dots group
+
+        // Define the size of the grid and spacing between dots
+        const dotSpacing = 75;  // Distance between each dot
+        const dotSize = 15;     // Size of each dot
+
+        // Create a grid of energy dots
+        for (let x = 55; x < config.width - 50; x += dotSpacing) {
+            for (let y = 50; y < config.height - 50; y += dotSpacing) {
+                // Only place the dot if it's not overlapping with any wall
+                if (!isOverlappingWall(scene, x, y, walls, dotSize)) {
+                    const dot = energyDots.create(x, y, 'energyDot');
+                    dot.setDisplaySize(dotSize, dotSize);
+                    dot.refreshBody();
+                }
+            }
+        }
+    }
+    // Helper function to check if a position overlaps with any walls using rectangle bounds
+    function isOverlappingWall(scene, x, y, walls, dotSize) {
+        // Create a temporary rectangle to represent the dot's area
+        const dotRect = new Phaser.Geom.Rectangle(x - dotSize / 2, y - dotSize / 2, dotSize, dotSize);
+
+        // Check for overlap with any walls using their bounds
+        let overlapping = false;
+        walls.getChildren().forEach(wall => {
+            const wallRect = wall.getBounds();  // Get the bounds of the wall
+
+            // Check if the dot's rectangle overlaps with the wall's rectangle
+            if (Phaser.Geom.Intersects.RectangleToRectangle(dotRect, wallRect)) {
+                overlapping = true;
+            }
+        });
+
+        return overlapping;
+    }
+
+
 
 
     // ----------------------------
@@ -230,8 +259,8 @@ function create() {
 
         // Create an enemy with the selected type
         const enemy = enemies.create(
-            Phaser.Math.Between(100, 924),
-            Phaser.Math.Between(100, 668),
+            Phaser.Math.Between(400, 500),
+            Phaser.Math.Between(400, 500),
             enemyType.key
         );
         
